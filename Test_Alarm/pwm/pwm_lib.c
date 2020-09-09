@@ -25,7 +25,8 @@ void pwm_init(void){
     seq_values.channel_2 = PWM_MAX_VALUE;
     seq_values.channel_3 = PWM_MAX_VALUE;
 
-    nrf_pwm_clk_t base_clock = NRF_PWM_CLK_1MHz;
+    // nrf_pwm_clk_t base_clock = NRF_PWM_CLK_1MHz;
+    nrf_pwm_clk_t base_clock = NRF_PWM_CLK_250kHz;
     nrf_pwm_mode_t mode = NRF_PWM_MODE_UP;
     uint16_t top_value = PWM_MAX_VALUE;
     nrf_pwm_dec_load_t dec_load = NRF_PWM_LOAD_INDIVIDUAL;
