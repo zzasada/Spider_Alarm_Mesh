@@ -4,7 +4,7 @@
 
 PROCESS(rgb_proc, "RGB process");
 
-static enum color {RED, GREEN, BLUE, MAGENTA, YELLOW, CYAN, WHITE, BLACK} current_color;
+static enum color {BLACK, BLUE, GREEN, RED, CYAN, MAGENTA, YELLOW, WHITE} current_color;
 
 void init_rgb(void){
     printf("RGB: init_rgb\n");
@@ -121,8 +121,8 @@ PROCESS_THREAD(rgb_proc, ev , data)
         
         switch_color(current_color);
         current_color++;
-        if(current_color > BLACK){
-            current_color = RED;
+        if(current_color > WHITE){
+            current_color = 0;
         }
         etimer_set(&timer, CLOCK_SECOND);
         PROCESS_YIELD_UNTIL(etimer_expired(&timer));
