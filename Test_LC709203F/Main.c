@@ -14,6 +14,41 @@
 #define AK9756_WIA1 0x00
 #define AK9756_WIA2 0x01
 
+#define LC709203F_I2CADDR_DEFAULT 0x0B     ///< LC709203F default i2c address
+#define LC709203F_CMD_THERMISTORB 0x06     ///< Read/write thermistor B
+#define LC709203F_CMD_INITRSOC 0x07        ///< Initialize RSOC calculation
+#define LC709203F_CMD_CELLTEMPERATURE 0x08 ///< Read/write batt temperature
+#define LC709203F_CMD_CELLVOLTAGE 0x09     ///< Read batt voltage
+#define LC709203F_CMD_APA 0x0B             ///< Adjustment Pack Application
+#define LC709203F_CMD_CELLITE 0x0F         ///< Read batt indicator to empty
+#define LC709203F_CMD_ICVERSION 0x11       ///< Read IC version
+#define LC709203F_CMD_ALARMRSOC 0x13       ///< Alarm on percent threshold
+#define LC709203F_CMD_ALARMVOLT 0x14       ///< Alarm on voltage threshold
+#define LC709203F_CMD_POWERMODE 0x15       ///< Sets sleep/power mode
+#define LC709203F_CMD_STATUSBIT 0x16       ///< Temperature obtaining method
+
+/*!  Battery temperature source */
+typedef enum {
+  LC709203F_TEMPERATURE_I2C = 0x0000,
+  LC709203F_TEMPERATURE_THERMISTOR = 0x0001,
+} lc709203_tempmode_t;
+
+/*!  Chip power state */
+typedef enum {
+  LC709203F_POWER_OPERATE = 0x0001,
+  LC709203F_POWER_SLEEP = 0x0002,
+} lc709203_powermode_t;
+
+/*!  Approx battery pack size */
+typedef enum {
+  LC709203F_APA_100MAH = 0x08,
+  LC709203F_APA_200MAH = 0x0B,
+  LC709203F_APA_500MAH = 0x10,
+  LC709203F_APA_1000MAH = 0x19,
+  LC709203F_APA_2000MAH = 0x2D,
+  LC709203F_APA_3000MAH = 0x36,
+} lc709203_adjustment_t;
+
 MIRA_IODEFS(
     MIRA_IODEF_NONE,    /* fd 0: stdin */
     MIRA_IODEF_RTT(0),  /* fd 1: stdout */
@@ -21,7 +56,7 @@ MIRA_IODEFS(
     /* More file descriptors can be added, for use with dprintf(); */
 );
 
-PROCESS(akm9756, "AKM9756 process");
+PROCESS(lc709203f, "LC709203F process");
 
 void mira_setup(void){
     mira_status_t rtt_ret;
@@ -30,19 +65,19 @@ void mira_setup(void){
 
     MIRA_MEM_SET_BUFFER(12288);
 
-    process_start(&akm9756, NULL);
+    process_start(&lc709203f, NULL);
 }
 
 
-PROCESS_THREAD(akm9756, ev, data){
+PROCESS_THREAD(lc709203f, ev, data){
     static struct etimer timer;
     // static uint8_t tx_buffer[2];
     // static uint8_t rx_buffer[sizeof(tx_buffer)];
     mira_status_t ret;
 
     mira_i2c_context_t context;
-    uint8_t device_address = AK9756_ADDRESS;
-    uint8_t register_address = AK9756_WIA1;
+    uint8_t device_address = LC709203F_I2CADDR_DEFAULT;
+    uint8_t register_address = LC709203F_CMD_ICVERSION;
     uint16_t register_address_size = 1;
     static uint8_t byte_array[2];
     uint16_t byte_array_size = 2;
@@ -60,7 +95,7 @@ PROCESS_THREAD(akm9756, ev, data){
     /* Pause once, so we don't run anything before finish of startup */
     PROCESS_PAUSE();
 
-    printf("Starting Test AKM9756.\n");
+    printf("Starting Test LC709203F.\n");
 
     ret = mira_i2c_init(&context, I2C_SCL, I2C_SDA, MIRA_I2C_FREQUENCY_100_KHZ);
     if(ret == MIRA_SUCCESS){

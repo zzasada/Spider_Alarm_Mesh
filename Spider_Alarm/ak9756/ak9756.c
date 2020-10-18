@@ -81,7 +81,7 @@ PROCESS_THREAD(ak9756_proc, ev , data){
 
     while (1) {
         PROCESS_WAIT_UNTIL(mira_gpio_has_triggered_edge_event(ALERT));
-        printf("AK9756 motion detected!!!!!!!!!\n");
+        printf("AK9756 motion detected!!!!!!!!! Need to pull\n");
         //TODO: notify the network sender motion has been detected.
     }
 
