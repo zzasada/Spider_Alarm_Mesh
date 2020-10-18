@@ -3,7 +3,9 @@
 
 PROCESS(nfc_proc, "NFC process");
 
-//TODO: lots
+//TODO: notify network process when name is available
+//TODO: save name in shared location
+//TODO: reboot when name is cleared
 
 PROCESS_THREAD(nfc_proc, ev , data)
 {

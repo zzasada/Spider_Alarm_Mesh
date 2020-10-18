@@ -5,7 +5,7 @@ PROCESS(alarm_proc, "Alarm process");
 
 void init_alarm(void){
     //TODO: intialize pwm and pins for alarm
-    printf("Alarm setup called");
+    printf("Alarm setup called\n");
 }
 
 //TODO: lots

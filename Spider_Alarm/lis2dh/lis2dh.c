@@ -3,7 +3,11 @@
 
 PROCESS(lis2dh_proc, "LIS2DH process");
 
-//TODO: lots
+//TODO: intialize lis2dh for tamper detection
+//TODO: check if connected to network
+//TODO: send tamper message if alarm is tampered with
+//TODO: trigger audio if tampered with
+//TODO: look for interrupt from accelerometer
 
 PROCESS_THREAD(lis2dh_proc, ev , data)
 {
