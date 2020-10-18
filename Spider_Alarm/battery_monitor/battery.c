@@ -3,7 +3,9 @@
 
 PROCESS(battery_proc, "Battery process");
 
-//TODO: lots
+//TODO: initialize LC709203F
+//TODO: enable interrupt from Battery Monitor
+//TODO: notify gateway if battery is below 3.4 volts
 
 PROCESS_THREAD(battery_proc, ev , data)
 {
