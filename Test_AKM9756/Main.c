@@ -40,7 +40,7 @@ PROCESS_THREAD(akm9756, ev, data){
     // static uint8_t rx_buffer[sizeof(tx_buffer)];
     mira_status_t ret;
 
-    mira_i2c_context_t context;
+    static mira_i2c_context_t context;
     uint8_t device_address = AK9756_ADDRESS;
     uint8_t register_address = AK9756_WIA1;
     uint16_t register_address_size = 1;
@@ -92,7 +92,7 @@ PROCESS_THREAD(akm9756, ev, data){
         }
 
         etimer_set(&timer, 1 * CLOCK_SECOND);
-        PROCESS_WAIT_UNTIL(etimer_expired(&timer));
+        PROCESS_YIELD_UNTIL(etimer_expired(&timer));
     }
 
     PROCESS_END();

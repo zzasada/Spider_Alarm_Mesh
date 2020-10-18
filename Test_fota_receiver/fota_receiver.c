@@ -42,7 +42,7 @@ void mira_setup(void)
 
     MIRA_MEM_SET_BUFFER(12288);
 
-    printf("I hope to read this!!! \n");
+    printf("Version 1\n");
     process_start(&main_proc, NULL);
 }
 
@@ -89,6 +89,7 @@ PROCESS_THREAD(main_proc, ev, data)
             printf("%s, Valid image: %ld bytes, version %d\n", net_state(), mira_fota_get_image_size(0), mira_fota_get_version(0));
         } else {
             printf("%s, No valid image available in cache\n", net_state());
+            mira_sys_reset();
         }
     }
 
