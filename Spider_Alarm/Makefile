@@ -1,6 +1,6 @@
 PROJECT_NAME = Spider_Alarm
 
-TARGET ?= nrf52840-os
+TARGET ?= nrf52840ble-os
 LIBDIR ?= $(CURDIR)/../../..
 
 CFLAGS += -DNRF52840_XXAA

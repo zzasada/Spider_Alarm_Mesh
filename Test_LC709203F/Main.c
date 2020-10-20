@@ -8,12 +8,6 @@
 
 #include "common.h"
 
-#define AKM9756_INTERVAL 1
-#define AK9756_ADDRESS 0x64
-
-#define AK9756_WIA1 0x00
-#define AK9756_WIA2 0x01
-
 #define LC709203F_I2CADDR_DEFAULT 0x0B     ///< LC709203F default i2c address
 #define LC709203F_CMD_THERMISTORB 0x06     ///< Read/write thermistor B
 #define LC709203F_CMD_INITRSOC 0x07        ///< Initialize RSOC calculation
@@ -68,28 +62,54 @@ void mira_setup(void){
     process_start(&lc709203f, NULL);
 }
 
+static void init_i2c(mira_i2c_context_t *context){
+    mira_status_t ret = mira_i2c_init(context, I2C_SCL, I2C_SDA, MIRA_I2C_FREQUENCY_100_KHZ);
+    if(ret == MIRA_SUCCESS){
+        printf("AK9756: I2C successfully intialized.\n");
+    }else if(ret == MIRA_ERROR_UNKNOWN){
+        printf("AK9756: I2C unknown error\n");
+    }else if(ret == MIRA_I2C_ERROR_INVALID_PIN){
+        printf("AK9756: I2C invalid pin.\n");
+    }else if(ret == MIRA_ERROR_NOT_IMPLEMENTED){
+        printf("AK9756: I2C not implemented???\n");
+    }else{
+        printf("AK9756: I2C shouldn't see this error.\n");
+    }
+}
+
+static mira_status_t read_register(mira_i2c_context_t *context, uint8_t register_address, uint8_t *byte_array, uint8_t bytes_to_read){
+        mira_i2c_set_transfer_type_read(context, &register_address, bytes_to_read, byte_array, bytes_to_read);
+        mira_i2c_set_slave_address(context, LC709203F_I2CADDR_DEFAULT);
+        return mira_i2c_transfer_start(context);
+}
+
+static mira_status_t write_register(mira_i2c_context_t *context, uint8_t register_address, uint8_t command){
+        uint8_t dst_local[2];
+        dst_local[0] = register_address;
+        dst_local[1] = command;
+        mira_i2c_set_transfer_type_write(context, &dst_local[0], 2);
+        mira_i2c_set_slave_address(context, LC709203F_I2CADDR_DEFAULT);
+        return mira_i2c_transfer_start(context);
+}
+
+void printDouble(double v, int decimalDigits)
+{
+  int i = 1;
+  int intPart, fractPart;
+  for (;decimalDigits!=0; i*=10, decimalDigits--);
+  intPart = (int)v;
+  fractPart = (int)((v-(double)(int)v)*i);
+  if(fractPart < 0) fractPart *= -1;
+  printf("%i.%i", intPart, fractPart);
+}
+
 
 PROCESS_THREAD(lc709203f, ev, data){
     static struct etimer timer;
-    // static uint8_t tx_buffer[2];
-    // static uint8_t rx_buffer[sizeof(tx_buffer)];
-    mira_status_t ret;
-
-    mira_i2c_context_t context;
-    uint8_t device_address = LC709203F_I2CADDR_DEFAULT;
-    uint8_t register_address = LC709203F_CMD_ICVERSION;
-    uint16_t register_address_size = 1;
+    static mira_status_t ret;
+    static mira_i2c_context_t context;
     static uint8_t byte_array[2];
-    uint16_t byte_array_size = 2;
-
-    static uint8_t  dst[2];
-    uint16_t        nb_dst_bytes = 2;
-    static uint8_t  command_buffer[1];
-    uint16_t        nb_command_bytes = 1;
-    // static uint8_t  write_data_buffer[1];
-    // uint16_t        nb_write_data_bytes = 1;
-
-    command_buffer[0] = 0x00;
+    static mira_status_t ret;
 
     PROCESS_BEGIN();
     /* Pause once, so we don't run anything before finish of startup */
@@ -97,33 +117,30 @@ PROCESS_THREAD(lc709203f, ev, data){
 
     printf("Starting Test LC709203F.\n");
 
-    ret = mira_i2c_init(&context, I2C_SCL, I2C_SDA, MIRA_I2C_FREQUENCY_100_KHZ);
-    if(ret == MIRA_SUCCESS){
-        printf("I2C successfully intialized.\n");
-    }else if(ret == MIRA_ERROR_UNKNOWN){
-        printf("I2C unknown error\n");
-    }else if(ret == MIRA_I2C_ERROR_INVALID_PIN){
-        printf("I2C invalid pin.\n");
-    }else if(ret == MIRA_ERROR_NOT_IMPLEMENTED){
-        printf("I2C not implemented???\n");
-    }else{
-        printf("I2C shouldn't see this error.\n");
+    init_i2c(&context);
+
+        //Confirm we can communicate with AK9756
+    ret = read_register(&context, LC709203F_CMD_ICVERSION, &byte_array[0], 1);
+    if(ret == MIRA_SUCCESS) {
+        PROCESS_WAIT_UNTIL(!mira_i2c_transfer_in_progress(&context));
+        // printf("AK9756: I2C transfer successful\n");
+        if(byte_array[0] == LC709203F_CMD_ICVERSION){
+            printf("LC709203F: success in getting manufacturer ID:%02X\n",byte_array[0]);
+        }else{
+            printf("LC709203F: invalid manufacturer ID:%02X\n",byte_array[0]);
+        }
+    } else {
+        printf("LC709203F: Error with I2C transfer.\n");
     }
 
 
     while (1) {
-        byte_array[0] = 0;
-        byte_array[1] = 0;
-        mira_i2c_construct_write_buffer(dst, &nb_dst_bytes, command_buffer, nb_command_bytes, NULL, 0);
-        mira_i2c_set_transfer_type_write(&context, dst, nb_dst_bytes);
-        mira_i2c_set_transfer_type_read(&context, &register_address, register_address_size, &byte_array[0], byte_array_size);
-        mira_i2c_set_slave_address(&context, device_address);
-        ret = mira_i2c_transfer_start(&context);
+        ret = read_register(&context, LC709203F_CMD_CELLVOLTAGE, &byte_array[0], 2);
         if(ret == MIRA_SUCCESS) {
             PROCESS_WAIT_UNTIL(!mira_i2c_transfer_in_progress(&context));
-            printf("I2C transfer successful:%02X,%02X \n",byte_array[0], byte_array[1]);
+            printf("LC709203F: Battery Voltage:%02X %02X\n",byte_array[0], byte_array[1]);
         } else {
-            printf("Error with I2C transfer.\n");
+            printf("LC709203F: Error with I2C transfer.\n");
         }
 
         etimer_set(&timer, 1 * CLOCK_SECOND);
