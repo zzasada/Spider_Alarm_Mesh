@@ -35,9 +35,8 @@ void mira_setup(void){
     // init_rgb();
 
     process_start(&main_proc, NULL);
-    process_start(&ak9756_setup_proc, NULL);
-    // alert_setup();
     // process_start(&ak9756_proc, NULL);
+    process_start(&ak9756_setup_proc, NULL);
     // process_start(&alarm_proc, NULL);
     // process_start(&battery_proc, NULL);
     // process_start(&ble_proc, NULL);
