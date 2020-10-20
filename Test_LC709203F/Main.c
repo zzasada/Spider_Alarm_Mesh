@@ -83,25 +83,25 @@ static mira_status_t read_register(mira_i2c_context_t *context, uint8_t register
         return mira_i2c_transfer_start(context);
 }
 
-static mira_status_t write_register(mira_i2c_context_t *context, uint8_t register_address, uint8_t command){
-        uint8_t dst_local[2];
-        dst_local[0] = register_address;
-        dst_local[1] = command;
-        mira_i2c_set_transfer_type_write(context, &dst_local[0], 2);
-        mira_i2c_set_slave_address(context, LC709203F_I2CADDR_DEFAULT);
-        return mira_i2c_transfer_start(context);
-}
+// static mira_status_t write_register(mira_i2c_context_t *context, uint8_t register_address, uint8_t command){
+//         uint8_t dst_local[2];
+//         dst_local[0] = register_address;
+//         dst_local[1] = command;
+//         mira_i2c_set_transfer_type_write(context, &dst_local[0], 2);
+//         mira_i2c_set_slave_address(context, LC709203F_I2CADDR_DEFAULT);
+//         return mira_i2c_transfer_start(context);
+// }
 
-void printDouble(double v, int decimalDigits)
-{
-  int i = 1;
-  int intPart, fractPart;
-  for (;decimalDigits!=0; i*=10, decimalDigits--);
-  intPart = (int)v;
-  fractPart = (int)((v-(double)(int)v)*i);
-  if(fractPart < 0) fractPart *= -1;
-  printf("%i.%i", intPart, fractPart);
-}
+// void printDouble(double v, int decimalDigits)
+// {
+//   int i = 1;
+//   int intPart, fractPart;
+//   for (;decimalDigits!=0; i*=10, decimalDigits--);
+//   intPart = (int)v;
+//   fractPart = (int)((v-(double)(int)v)*i);
+//   if(fractPart < 0) fractPart *= -1;
+//   printf("%i.%i", intPart, fractPart);
+// }
 
 
 PROCESS_THREAD(lc709203f, ev, data){
@@ -109,7 +109,6 @@ PROCESS_THREAD(lc709203f, ev, data){
     static mira_status_t ret;
     static mira_i2c_context_t context;
     static uint8_t byte_array[2];
-    static mira_status_t ret;
 
     PROCESS_BEGIN();
     /* Pause once, so we don't run anything before finish of startup */
