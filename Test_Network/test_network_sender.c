@@ -9,10 +9,16 @@ This example is provided as is, without warranty.
 #include <mira.h>
 #include <stdio.h>
 #include <string.h>
+#include "common.h"
 
 #define UDP_PORT 456
-#define SEND_INTERVAL 60
+#define SEND_INTERVAL 10
 #define CHECK_NET_INTERVAL 1
+
+static mira_net_udp_connection_t *response_connection;
+static char response_data[256];
+static uint16_t response_data_len = 0;
+// static mira_net_address_t response_address;
 
 /*
  * Identifies as a node.
@@ -29,50 +35,73 @@ static const mira_net_config_t net_config = {
 
 MIRA_IODEFS(
     MIRA_IODEF_NONE,    /* fd 0: stdin */
-    MIRA_IODEF_UART(0), /* fd 1: stdout */
+    MIRA_IODEF_RTT(0),  /* fd 1: stdout */
     MIRA_IODEF_NONE     /* fd 2: stderr */
     /* More file descriptors can be added, for use with dprintf(); */
 );
 
-static void udp_listen_callback(
-    mira_net_udp_connection_t *connection,
-    const void *data,
-    uint16_t data_len,
-    const mira_net_udp_callback_metadata_t *metadata,
-    void *storage)
-{
+PROCESS(main_proc, "Main process");
+PROCESS(response_proc, "MAIN process");
+
+static void udp_listen_callback(mira_net_udp_connection_t *connection, const void *data, uint16_t data_len, const mira_net_udp_callback_metadata_t *metadata, void *storage){
     char buffer[MIRA_NET_MAX_ADDRESS_STR_LEN];
     uint16_t i;
 
     printf("Received message from [%s]:%u: ",
-        mira_net_toolkit_format_address(buffer, metadata->source_address),
-        metadata->source_port);
+        mira_net_toolkit_format_address(buffer, metadata->source_address),metadata->source_port);
     for (i = 0; i < data_len - 1; i++) {
         printf("%c", ((char *) data)[i]);
     }
     printf("\n");
+
+    response_connection = connection;
+    memcpy(response_data, data, data_len);
+    response_data_len = data_len;
+
+    process_poll(&response_proc);
 }
 
-PROCESS(main_proc, "Main process");
-
-void mira_setup(
-    void)
-{
-    mira_status_t uart_ret;
-    mira_uart_config_t uart_config = {
-        .baudrate = 115200,
-        .tx_pin = MIRA_GPIO_PIN(0, 6),
-        .rx_pin = MIRA_GPIO_PIN(0, 8)
-    };
+void mira_setup(void){
+    mira_status_t rtt_ret;
+    rtt_ret = mira_rtt_init();
+    if(rtt_ret != MIRA_SUCCESS){ /*TODO: figure out how to report this */ }
 
     MIRA_MEM_SET_BUFFER(12288);
 
-    uart_ret = mira_uart_init(0, &uart_config);
-    if (uart_ret != MIRA_SUCCESS) {
-        /* Nowhere to send an error message */
-    }
-
     process_start(&main_proc, NULL);
+    process_start(&response_proc, NULL);
+}
+
+PROCESS_THREAD(response_proc, ev, data){
+    // static mira_net_udp_connection_t *response_udp_connection;
+    static struct etimer response_timer;
+    static mira_net_address_t response_net_address;
+    static char response_buffer[MIRA_NET_MAX_ADDRESS_STR_LEN];
+    static mira_status_t response_res;
+    // static const char *response_message = "id:100B,battery:True,fw:1";
+
+    PROCESS_BEGIN();
+    /* Pause once, so we don't run anything before finish of startup */
+    PROCESS_PAUSE();
+    while (1) {
+        /* Sleep until next event, regardless of reason */
+        PROCESS_YIELD();
+        if(response_data_len > 0){
+            printf("Request to udp respond");
+            response_res = mira_net_get_root_address(&response_net_address);
+            
+            if (response_res != MIRA_SUCCESS) {
+                    printf("Waiting for root address (res: %d)\n", response_res);
+                    etimer_set(&response_timer, CHECK_NET_INTERVAL * CLOCK_SECOND);
+            } else {
+                printf("Sending to address: %s\n", mira_net_toolkit_format_address(response_buffer, &response_net_address));
+                mira_net_udp_send_to(response_connection, &response_net_address, UDP_PORT, response_data, strlen(response_data));
+                mira_net_udp_close(response_connection);
+                response_data_len = 0;
+            }
+        }
+    }
+    PROCESS_END();
 }
 
 PROCESS_THREAD(main_proc, ev, data)
@@ -84,7 +113,7 @@ PROCESS_THREAD(main_proc, ev, data)
     static mira_net_address_t net_address;
     static char buffer[MIRA_NET_MAX_ADDRESS_STR_LEN];
     static mira_status_t res;
-    static const char *message = "Hello Network";
+    static const char *message = "id:100B,battery:True,fw:1";
 
     PROCESS_BEGIN();
     /* Pause once, so we don't run anything before finish of startup */
@@ -129,10 +158,8 @@ PROCESS_THREAD(main_proc, ev, data)
                  * Root address is successfully retrieved, send a message to the
                  * root node on the given UDP Port.
                  */
-                printf("Sending to address: %s\n",
-                    mira_net_toolkit_format_address(buffer, &net_address));
-                mira_net_udp_send_to(udp_connection, &net_address, UDP_PORT,
-                    message, strlen(message));
+                printf("Sending to address: %s %s\n", mira_net_toolkit_format_address(buffer, &net_address), message);
+                mira_net_udp_send_to(udp_connection, &net_address, UDP_PORT, message, strlen(message));
                 etimer_set(&timer, SEND_INTERVAL * CLOCK_SECOND);
             }
         }
