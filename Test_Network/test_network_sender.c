@@ -49,7 +49,7 @@ static void udp_listen_callback(mira_net_udp_connection_t *connection, const voi
 
     printf("Received message from [%s]:%u: ",
         mira_net_toolkit_format_address(buffer, metadata->source_address),metadata->source_port);
-    for (i = 0; i < data_len - 1; i++) {
+    for (i = 0; i < data_len; i++) {
         printf("%c", ((char *) data)[i]);
     }
     printf("\n");
@@ -87,14 +87,14 @@ PROCESS_THREAD(response_proc, ev, data){
         /* Sleep until next event, regardless of reason */
         PROCESS_YIELD();
         if(response_data_len > 0){
-            printf("Request to udp respond");
+            printf("Request to udp respond\n");
             response_res = mira_net_get_root_address(&response_net_address);
             
             if (response_res != MIRA_SUCCESS) {
                     printf("Waiting for root address (res: %d)\n", response_res);
                     etimer_set(&response_timer, CHECK_NET_INTERVAL * CLOCK_SECOND);
             } else {
-                printf("Sending to address: %s\n", mira_net_toolkit_format_address(response_buffer, &response_net_address));
+                printf("Sending to address: %s,%s\n", mira_net_toolkit_format_address(response_buffer, &response_net_address), response_data);
                 mira_net_udp_send_to(response_connection, &response_net_address, UDP_PORT, response_data, strlen(response_data));
                 mira_net_udp_close(response_connection);
                 response_data_len = 0;
@@ -113,7 +113,7 @@ PROCESS_THREAD(main_proc, ev, data)
     static mira_net_address_t net_address;
     static char buffer[MIRA_NET_MAX_ADDRESS_STR_LEN];
     static mira_status_t res;
-    static const char *message = "id:100B,battery:True,fw:1";
+    static const char *message = "hb,id:100B,battery:True,fw:1";
 
     PROCESS_BEGIN();
     /* Pause once, so we don't run anything before finish of startup */
