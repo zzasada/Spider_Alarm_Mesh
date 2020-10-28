@@ -24,8 +24,7 @@
 
 PROCESS(boot_proc, "Boot process");
 
-void mira_setup(
-    void)
+void mira_setup(void)
 {
    // MIRA_MEM_SET_BUFFER(15000);
     board_setup();
@@ -53,7 +52,7 @@ PROCESS_THREAD(boot_proc, ev, data)
     if(app_config_is_configured()) {
         printf("Configured, starting\n");
         process_start(&main_proc, NULL);
-        process_start(&vibra_proc, NULL);
+        // process_start(&vibra_proc, NULL);
     } else {
         printf("Not configured, sleeping\n");
     }

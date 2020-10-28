@@ -12,6 +12,8 @@ python mira_license.py license -d COM84 -i 4787ca1fbb2be7c4 -P nrfjprog -s 50130
 python mira_license.py license -d COM84 -i ce7bdbe198cfb538 -P nrfjprog -s 50130153 -a 0xff000 -l 0x1000
 python mira_license.py license -d COM84 -i b3063c1949e35d73 -P nrfjprog -s 683934541 -a 0xff000 -l 0x1000
 
+python mira_license.py license -I b3063c1949e35d73.lic -a 0xf7000 -l 0x1000 -i b3063c1949e35d73
+
 # Memory Allocation
 
 0x0000 - 0x0A17 - bootloader/mbr
