@@ -53,10 +53,7 @@ static void nfc_field_off(
     }
 }
 
-static uint8_t *nfc_file_open(
-    mira_nfc_file_id_t file_id,
-    mira_size_t *size,
-    void *storage)
+static uint8_t *nfc_file_open(mira_nfc_file_id_t file_id, mira_size_t *size, void *storage)
 {
     int i;
     mira_nfc_ndef_writer_t writer;
@@ -67,10 +64,7 @@ static uint8_t *nfc_file_open(
     {
         printf("NDEF file open\n");
 
-        mira_nfc_ndef_write_start(
-            &writer,
-            nfc_file_buffer,
-            sizeof(nfc_file_buffer));
+        mira_nfc_ndef_write_start(&writer, nfc_file_buffer, sizeof(nfc_file_buffer));
 
 
         /* First field should be of identifiable header 
@@ -105,10 +99,7 @@ static uint8_t *nfc_file_open(
     return NULL;
 }
 
-static mira_bool_t nfc_file_save(
-    mira_nfc_file_id_t file_id,
-    mira_size_t size,
-    void *storage)
+static mira_bool_t nfc_file_save(mira_nfc_file_id_t file_id, mira_size_t size, void *storage)
 {
     int i;
     if (file_id == MIRA_NFC_NDEF_FILE_ID)
@@ -138,15 +129,13 @@ static mira_nfc_config_t nfc_conf = {
     .proprietary_file_count = 0
 };
 
-void nfcif_init(
-    void)
+void nfcif_init(void)
 {
     nfc_n_handlers = 0;
     mira_nfc_init(&nfc_conf);
 }
 
-int nfcif_register_handler(
-    const nfcif_handler_t *handler)
+int nfcif_register_handler(const nfcif_handler_t *handler)
 {
     nfc_handlers[nfc_n_handlers] = *handler;
     nfc_n_handlers++;

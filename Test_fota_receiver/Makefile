@@ -26,6 +26,6 @@ CFLAGS += -I $(CURDIR)/../../../nRF5SDK/components/libraries/experimental_sectio
 SOURCE_FILES = \
 	main.c \
 	Fota_crc_tool/fota_crc_tool.c \
-	NRF_mbr/nrf_mbr_sd.c 
+	# NRF_mbr/nrf_mbr_sd.c 
 
 include $(LIBDIR)/Makefile.include

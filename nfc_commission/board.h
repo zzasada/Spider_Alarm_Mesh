@@ -29,7 +29,7 @@
 
 
 /* DEBUG FOR RTT */
-#define RTT_DEBUG       0
+#define RTT_DEBUG       1
 /* ------------- */
 
 #if RTT_DEBUG
@@ -47,11 +47,8 @@
 
 #endif
 
-void board_setup(
-    void);
+void board_setup(void);
 
-void board_led_set(
-    int num,
-    int val);
+void board_led_set(int num, int val);
 
 #endif

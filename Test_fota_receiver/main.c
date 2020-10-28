@@ -100,19 +100,21 @@ int fota_app_init(uint32_t version)
 
     // Ensure that the data in the settings page is correct
     application_max_size = (uint32_t) &__ApplicationEnd - (uint32_t) &__ApplicationStart;
-    if (flash_settings->bank_0.image_size > application_max_size) {
+    if (flash_settings->bank_0.image_size > application_max_size && flash_settings->bank_0.image_size < 0xFFFFFFFF) {
         printf("Bootloader settings on flash is corrupt image_size=%lu, app_max_size=%lu\n", flash_settings->bank_0.image_size, application_max_size);
         // return -1;
+    }else if(flash_settings->bank_0.image_size == 0xFFFFFFFF){
+        printf("Bootloader settings is unwritten.\n");
+        //what does this mean???
     }else{
         printf("Application max size is ok\n");
-    }
-
-    // Ensure that what's in the bootloader settings page matches the calculated CRC
-    if (flash_settings->crc != calc_settings_crc(flash_settings)) {
-        printf("Bootloader settings CRC does not match\n");
-        // return -1;
-    }else{
-        printf("Bootloader settings CRC match\n");
+            // Ensure that what's in the bootloader settings page matches the calculated CRC
+        if (flash_settings->crc != calc_settings_crc(flash_settings)) {
+            printf("Bootloader settings CRC does not match\n");
+            // return -1;
+        }else{
+            printf("Bootloader settings CRC match\n");
+        }
     }
 
     if (mira_fota_init() != MIRA_SUCCESS) {
@@ -159,7 +161,9 @@ const char *net_state(void)
 
 PROCESS_THREAD(main_proc, ev, data)
 {
+
     static struct etimer timer;
+    static uint16_t time = 0;
 
     PROCESS_BEGIN();
     PROCESS_PAUSE();
@@ -182,14 +186,20 @@ PROCESS_THREAD(main_proc, ev, data)
     while (1) {
         etimer_set(&timer, CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+        time++;
 
         if (mira_fota_is_valid(FOTA_FW_SLOT_ID)) {
-            printf("%s, Valid image: %ld bytes, version %d\n", net_state(), mira_fota_get_image_size(FOTA_FW_SLOT_ID), mira_fota_get_version(FOTA_FW_SLOT_ID));
-            fota_upgrade.ready = true;
-            // process_poll(&fota_upgrade_proc);
-            process_start(&fota_upgrade_proc, NULL);
+            if(mira_fota_get_image_size(FOTA_FW_SLOT_ID) > 0){
+                printf("%s, Valid image: %ld bytes, version %d\n", net_state(), mira_fota_get_image_size(FOTA_FW_SLOT_ID), mira_fota_get_version(FOTA_FW_SLOT_ID));
+                fota_upgrade.ready = true;
+                process_start(&fota_upgrade_proc, NULL);
+            }else{
+
+                printf("image size is 0, what to do now???\n");
+                //Possibly erase fota image???
+            }
         } else {
-            printf("%s, No valid image available in cache\n", net_state());
+            printf("%s, No valid image available in cache elapsed  time=%is\n", net_state(), time);
         }
     }
 
