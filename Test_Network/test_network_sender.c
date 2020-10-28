@@ -12,7 +12,7 @@ This example is provided as is, without warranty.
 #include "common.h"
 
 #define UDP_PORT 456
-#define SEND_INTERVAL 10
+#define SEND_INTERVAL 60
 #define CHECK_NET_INTERVAL 1
 
 static mira_net_udp_connection_t *response_connection;
@@ -96,7 +96,7 @@ PROCESS_THREAD(response_proc, ev, data){
             } else {
                 printf("Sending to address: %s,%s\n", mira_net_toolkit_format_address(response_buffer, &response_net_address), response_data);
                 mira_net_udp_send_to(response_connection, &response_net_address, UDP_PORT, response_data, strlen(response_data));
-                mira_net_udp_close(response_connection);
+                // mira_net_udp_close(response_connection);
                 response_data_len = 0;
             }
         }
