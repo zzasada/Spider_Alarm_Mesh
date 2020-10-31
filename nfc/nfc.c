@@ -25,7 +25,7 @@ static void print_var(const char *name, const uint8_t *data, mira_size_t length)
 
 MIRA_IODEFS(
     MIRA_IODEF_NONE,
-    MIRA_IODEF_UART(0), /* fd 1 = stdout. Enable printf */
+    MIRA_IODEF_RTT(0), /* fd 1 = stdout. Enable printf */
     MIRA_IODEF_NONE
 );
 
@@ -57,17 +57,11 @@ static mira_nfc_config_t nfc_conf = {
 
 void mira_setup(void)
 {
-    mira_status_t uart_ret;
-    mira_uart_config_t uart_config = {
-        .baudrate = 115200,
-        .tx_pin = MIRA_GPIO_PIN(0, 6),
-        .rx_pin = MIRA_GPIO_PIN(0, 8)
-    };
+    mira_status_t rtt_ret;
+    rtt_ret = mira_rtt_init();
+    if(rtt_ret != MIRA_SUCCESS){ /*TODO: figure out how to report this */ }
+    MIRA_MEM_SET_BUFFER(12288);
 
-    uart_ret = mira_uart_init(0, &uart_config);
-    if (uart_ret != MIRA_SUCCESS) {
-        /* Nowhere to send an error message */
-    }
 
     /* Start main process */
     process_start(&main_proc, NULL);

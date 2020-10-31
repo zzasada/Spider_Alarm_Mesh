@@ -30,8 +30,7 @@ MIRA_IODEFS(
     MIRA_IODEF_NONE,
     );
 
-void board_setup(
-    void)
+void board_setup(void)
 {
     uint32_t i;
 
@@ -61,30 +60,30 @@ void board_setup(
 
     /* Enable SPI pins */
 
-    mira_gpio_set_dir(BOARD_SPI_MOSI_PIN, MIRA_GPIO_DIR_OUT);
-    mira_gpio_set_dir(BOARD_SPI_MISO_PIN, MIRA_GPIO_DIR_IN);
-    mira_gpio_set_dir(BOARD_SPI_SCK_PIN, MIRA_GPIO_DIR_OUT);
+    // mira_gpio_set_dir(BOARD_SPI_MOSI_PIN, MIRA_GPIO_DIR_OUT);
+    // mira_gpio_set_dir(BOARD_SPI_MISO_PIN, MIRA_GPIO_DIR_IN);
+    // mira_gpio_set_dir(BOARD_SPI_SCK_PIN, MIRA_GPIO_DIR_OUT);
 
-    mira_gpio_set_value(BOARD_SPI_MOSI_PIN, MIRA_TRUE);
-    mira_gpio_set_value(BOARD_SPI_SCK_PIN, MIRA_TRUE);
+    // mira_gpio_set_value(BOARD_SPI_MOSI_PIN, MIRA_TRUE);
+    // mira_gpio_set_value(BOARD_SPI_SCK_PIN, MIRA_TRUE);
 
     /* Enable Sensor specific pins to sensors */
 
-    mira_gpio_set_dir(BOARD_BME280_CS_PIN, MIRA_GPIO_DIR_OUT);
+    // mira_gpio_set_dir(BOARD_BME280_CS_PIN, MIRA_GPIO_DIR_OUT);
 
-    mira_gpio_set_dir(BOARD_LIS2DH12_CS_PIN, MIRA_GPIO_DIR_OUT);
-    mira_gpio_set_dir(BOARD_LIS2DH12_INT1_PIN, MIRA_GPIO_DIR_IN);
-    mira_gpio_set_dir(BOARD_LIS2DH12_INT1_PIN, MIRA_GPIO_DIR_IN);
+    // mira_gpio_set_dir(BOARD_LIS2DH12_CS_PIN, MIRA_GPIO_DIR_OUT);
+    // mira_gpio_set_dir(BOARD_LIS2DH12_INT1_PIN, MIRA_GPIO_DIR_IN);
+    // mira_gpio_set_dir(BOARD_LIS2DH12_INT1_PIN, MIRA_GPIO_DIR_IN);
 
-    /* Pull both CS low to enable SPI mode on devices, set high afterwards */
-    mira_gpio_set_value(BOARD_BME280_CS_PIN, MIRA_FALSE);
-    mira_gpio_set_value(BOARD_LIS2DH12_CS_PIN, MIRA_FALSE);
+    // /* Pull both CS low to enable SPI mode on devices, set high afterwards */
+    // mira_gpio_set_value(BOARD_BME280_CS_PIN, MIRA_FALSE);
+    // mira_gpio_set_value(BOARD_LIS2DH12_CS_PIN, MIRA_FALSE);
 
-    for(i=0; i<1000000; i++) { asm volatile ("nop"); }
+    // for(i=0; i<1000000; i++) { asm volatile ("nop"); }
 
-    /* Set both CS high, which is idle state */
-    mira_gpio_set_value(BOARD_BME280_CS_PIN, MIRA_TRUE);
-    mira_gpio_set_value(BOARD_LIS2DH12_CS_PIN, MIRA_TRUE);
+    // /* Set both CS high, which is idle state */
+    // mira_gpio_set_value(BOARD_BME280_CS_PIN, MIRA_TRUE);
+    // mira_gpio_set_value(BOARD_LIS2DH12_CS_PIN, MIRA_TRUE);
 
     //spi_init();
     nfcif_init();

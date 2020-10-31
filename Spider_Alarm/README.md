@@ -33,3 +33,22 @@
     Disable Alarm
     Test Alarm
 
+# V1
+    -Implement LIS3DH
+    -Implement BQ35100
+    -Get temperature from BQ35100
+    -Evaluate NFC antenna and A111 on one side of pcb and all components on otherside
+# Firmware Versioning
+
+# V0
+    -TODO:
+        -Write name to nfc -> start network connection
+        -Write test to nfc -> run test of all sensors and self erase name
+        -Write "" to name and device reboots and goes to standby mode waiting for nfc
+        -Measure sleep current in NFC standby
+        -Test nfc through plastic
+
+        -Communicate with A111
+        -Implement Motion detection
+
+        -Implement FOTA
