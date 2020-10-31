@@ -11,7 +11,7 @@ PROCESS(boot_proc, "Boot process");
 
 MIRA_IODEFS(
     MIRA_IODEF_NONE,    /* fd 0: stdin */
-    MIRA_IODEF_RTT(0),  /* fd 1: stdout */
+    MIRA_IODEF_RTT(0),
     MIRA_IODEF_NONE     /* fd 2: stderr */
     /* More file descriptors can be added, for use with dprintf(); */
 );
@@ -30,7 +30,7 @@ void mira_setup(void){
 
 PROCESS_THREAD(boot_proc, ev, data)
 {
-    static struct etimer timer;
+    // static struct etimer timer;
 
     PROCESS_BEGIN();
     PROCESS_PAUSE();
@@ -54,7 +54,7 @@ PROCESS_THREAD(boot_proc, ev, data)
     }
 
     while (1) {
-        etimer_set(&timer, CLOCK_SECOND);
+        etimer_set(&timer, 10*CLOCK_SECOND);
         PROCESS_YIELD_UNTIL(etimer_expired(&timer));
     }
 
