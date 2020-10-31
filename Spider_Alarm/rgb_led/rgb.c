@@ -4,7 +4,10 @@
 
 PROCESS(rgb_proc, "RGB process");
 
-static enum color {BLACK, BLUE, GREEN, RED, CYAN, MAGENTA, YELLOW, WHITE} current_color;
+static enum color current_color;
+
+const int PAUSE_DURATION = 1;
+const int PULSE_DURATION = 100; //mS
 
 void init_rgb(void){
     printf("RGB: init_rgb\n");
@@ -16,6 +19,11 @@ void init_rgb(void){
 
     mira_gpio_set_dir(LED_BLUE, MIRA_GPIO_DIR_OUT);
     mira_gpio_set_value(LED_BLUE, 1);
+}
+
+void set_current_color(int color){
+    // printf("Setting current color %i\n", color);
+    current_color = color;
 }
 
 static void red(void){
@@ -66,7 +74,7 @@ static void cyan(void){
     mira_gpio_set_value(LED_BLUE, 0);
 }
 
-static void switch_color(int color){
+static void set_color(int color){
     switch (color){
     
     case RED:
@@ -116,14 +124,11 @@ PROCESS_THREAD(rgb_proc, ev , data){
     printf("RGB, Starting process\n");
 
     while (true) {
-        // printf("RGB: hello\n");
-        
-        switch_color(current_color);
-        current_color++;
-        if(current_color > WHITE){
-            current_color = BLACK;
-        }
-        etimer_set(&timer, CLOCK_SECOND);
+        set_color(current_color);
+        etimer_set(&timer, PULSE_DURATION);
+        PROCESS_YIELD_UNTIL(etimer_expired(&timer));
+        set_color(BLACK);
+        etimer_set(&timer, PAUSE_DURATION * CLOCK_SECOND);
         PROCESS_YIELD_UNTIL(etimer_expired(&timer));
     }
     PROCESS_END()

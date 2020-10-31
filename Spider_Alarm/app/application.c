@@ -6,6 +6,7 @@
 #include "application.h"
 #include "config/app-config.h"
 #include "../Common/common.h"
+#include "rgb_led/rgb.h"
 
 #define CHECK_NET_INTERVAL 5
 
@@ -28,15 +29,18 @@ static void udp_listen_callback(mira_net_udp_connection_t *connection, const voi
 const char *net_status(void){
     switch (mira_net_get_state()) {
     case MIRA_NET_STATE_NOT_ASSOCIATED:
+        set_current_color(BLUE);
         return "not associated";
 
     case MIRA_NET_STATE_IS_COORDINATOR:
         return "is coordinator";
 
     case MIRA_NET_STATE_ASSOCIATED:
+        set_current_color(MAGENTA);
         return "associated";
 
     case MIRA_NET_STATE_JOINED:
+        set_current_color(GREEN);
         return "joined";
     }
     return "unknown";
@@ -60,8 +64,14 @@ PROCESS_THREAD(main_proc, ev, data) {
     static const char *message = "Hello Network";
     mira_net_config_t netconf;
     static uint32_t seconds;
+    static int previous_color = YELLOW;
+    static int color = BLACK;
 
     PROCESS_BEGIN();
+    PROCESS_PAUSE();
+
+    init_rgb();
+    process_start(&rgb_proc, NULL);
 
     printf("APP: Main process started\n");
 
@@ -93,6 +103,10 @@ PROCESS_THREAD(main_proc, ev, data) {
             printf("APP: %s, Waiting for network connection %lu s\n", net_status(), seconds);
             etimer_set(&timer, CHECK_NET_INTERVAL * CLOCK_SECOND);
         } else {
+            if(color != previous_color){
+                set_current_color(GREEN);
+                previous_color = color;
+            }
             /* Try to retrieve the root address. */
             res = mira_net_get_root_address(&net_address);
             res = mira_net_get_parent_address(&parent_address);
