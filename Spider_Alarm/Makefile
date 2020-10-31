@@ -19,9 +19,14 @@ SOURCE_FILES = \
 	heartbeat/heartbeat.c \
 	lis2dh/lis2dh.c \
 	network/network.c \
-	nfc/nfc.c \
 	pwm/pwm_lib.c \
 	rgb_led/rgb.c \
-	Main.c
+	config/app-config.c \
+	nfc/net-status.c \
+	nfc/nfc-if.c \
+	app/application.c \
+	../Common/common.c \
+	boot.c 
+
 
 include $(LIBDIR)/Makefile.include
