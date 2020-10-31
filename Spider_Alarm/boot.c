@@ -4,6 +4,8 @@
 #include "config/app-config.h"
 #include "app/application.h"
 #include "nfc/nfc-if.h"
+#include "self_test/self_test.h"
+#include "rgb_led/rgb.h"
 
 PROCESS(boot_proc, "Boot process");
 
@@ -18,26 +20,11 @@ void mira_setup(void){
     mira_status_t rtt_ret;
     rtt_ret = mira_rtt_init();
     if(rtt_ret != MIRA_SUCCESS){ /*TODO: figure out how to report this */ }
+
     MIRA_MEM_SET_BUFFER(12288);
 
-    
-    // init_alarm();
-    // init_rgb();
-
-    // process_start(&main_proc, NULL);
-
-    // process_start(&alarm_proc, NULL);
-    // process_start(&battery_proc, NULL);
-    // process_start(&ble_proc, NULL);
-    // process_start(&fota_proc, NULL);
-    // process_start(&heartbeat_proc, NULL);
-    // process_start(&lis2dh_proc, NULL);
-    // process_start(&network_proc, NULL);
-    // process_start(&nfc_proc, NULL);
-    // process_start(&rgb_proc, NULL);
-
+    init_rgb();
     nfcif_init();
-
     process_start(&boot_proc, NULL);
 }
 
@@ -51,15 +38,17 @@ PROCESS_THREAD(boot_proc, ev, data)
 
     app_config_init();
 
-    int configured = app_config_is_configured();
+    int configured = app_name_is_configured();
+    printf("BOOT: configured = %i\n",configured);
 
     if(configured == CONFIGURED) {
         printf("BOOT: Configured, starting\n");
         process_start(&main_proc, NULL);
     }else if(configured == TEST){ 
-        printf("BOOT: run self test");
-        //TODO: test process
-        //TODO: erase name and reboot.
+        printf("BOOT: run self test\n");
+        process_start(&selftest_proc, NULL);
+        // erase_device_name();
+        // mira_sys_reset();
     }else {
         printf("BOOT: Not configured, sleeping\n");
     }

@@ -107,8 +107,7 @@ static void switch_color(int color){
     }
 }
 
-PROCESS_THREAD(rgb_proc, ev , data)
-{
+PROCESS_THREAD(rgb_proc, ev , data){
     static struct etimer timer;
 
     PROCESS_BEGIN();
@@ -122,7 +121,7 @@ PROCESS_THREAD(rgb_proc, ev , data)
         switch_color(current_color);
         current_color++;
         if(current_color > WHITE){
-            current_color = 0;
+            current_color = BLACK;
         }
         etimer_set(&timer, CLOCK_SECOND);
         PROCESS_YIELD_UNTIL(etimer_expired(&timer));

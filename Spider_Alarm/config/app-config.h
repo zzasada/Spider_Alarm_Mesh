@@ -36,6 +36,8 @@ enum configured {NOT_CONFIGURED, CONFIGURED, TEST};
 extern app_config_t app_config;
 
 void app_config_init(void);
+int app_name_is_configured(void);
 int app_config_is_configured(void);
+void erase_device_name(void);
 
 #endif
