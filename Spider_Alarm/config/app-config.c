@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2018, LumenRadio AB All rights reserved.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
 #include "app-config.h"
 
 #include <mira.h>
@@ -23,6 +7,7 @@
 #include <unistd.h>
 
 #include "nfc/nfc-if.h"
+#include "self_test/self_test.h"
 
 #define APP_CONFIG_EXPOSE_KEY 1
 
@@ -80,6 +65,36 @@ void app_config_init(void)
     nfcif_register_handler(&config_nfc_handler);
 
     process_start(&app_config_writer, NULL);
+}
+
+int app_name_is_configured(void){
+    int name_length = strlen(app_config.name);
+    if(name_length > 0){
+        int is_test = strcmp(app_config.name, "test");
+        if(is_test == 0){
+            return TEST;
+        }
+        
+        int is_erased = strcmp(app_config.name, "-");
+        if(is_erased == 0){
+            return NOT_CONFIGURED;
+        }
+
+        //IT wasn't the test case and it hasn't been erase, must be legit.
+        return CONFIGURED;
+    }else{
+        return NOT_CONFIGURED;
+    }
+
+    return NOT_CONFIGURED;
+}
+
+void erase_device_name(void){
+    printf("APP-CONFIG: erasing device name.\n");
+    memcpy(app_config.name, "-", 1);
+    mira_status_t status = mira_config_write(&new_config, sizeof(app_config_t));
+    printf("APP-CONFIG: Status: %d\n", status);
+    while(mira_config_is_working()){}
 }
 
 int app_config_is_configured(void)

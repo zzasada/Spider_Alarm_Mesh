@@ -26,6 +26,7 @@ SOURCE_FILES = \
 	nfc/nfc-if.c \
 	app/application.c \
 	../Common/common.c \
+	self_test/self_test.c \
 	boot.c 
 
 
