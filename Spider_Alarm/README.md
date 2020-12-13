@@ -23,6 +23,7 @@
         -Implement BQ35100
         -Get temperature from BQ35100
         -Allow NFC writing of PAN_ID and NETWORK_KEY
+        -Enable BLE connection
 
         -Evaluate NFC antenna and A111 on one side of pcb and all components on otherside
 
@@ -34,10 +35,10 @@
             - Measure sleep current in NFC standby (done) 479 uA (4.5 years in inventory mode.)
 
         -TODO:
-            
-            - Test nfc through plastic
+            - Fix NFC when building for nRF52840-os
             - Communicate with A111
             - Implement Motion detection
             - Implement FOTA
             - Write self test
             - ARM / Disarm Functionality
+            - Evaluate Panasonic PIR
