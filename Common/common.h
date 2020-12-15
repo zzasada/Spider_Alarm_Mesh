@@ -1,9 +1,13 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <mira.h>
+#include <stdio.h>
+
 #define UDP_PORT 456
 #define PAN_ID_COMMON 0x8724a685
-#define KEY_COMMON { 0x93, 0x30, 0x0c, 0x4b, 0x3a, 0xd1, 0x0f, 0x8b, 0x69, 0xc3, 0xa1, 0x17, 0x98, 0x5f, 0xc0, 0x47,}
+#define KEY_LENGTH 16
+extern const uint8_t KEY_COMMON[KEY_LENGTH];
 
 enum device_type{ UNKNOWN_DEVICE=-1,GATEWAY, LATCH, ALARM, MOTION_SENSOR, ALARM_AND_MOTION_SENSOR, NETWORK_EXTENDER};
 enum message_type{ UNKNOWN_MESSAGE=-1, SET_LATCH, RELEASE_LATCH, START_ALARM, STOP_ALARM, DISABLE_ALARM, ENABLE_ALARM, MOTION_DETECTED, IR_DETECTED }; 
@@ -16,7 +20,7 @@ enum message_type{ UNKNOWN_MESSAGE=-1, SET_LATCH, RELEASE_LATCH, START_ALARM, ST
 #define LIS2DH_MOSI     MIRA_GPIO_PIN(1,02)
 #define LIS2DH_SCK      MIRA_GPIO_PIN(1,01)
 #define ALARM_ENABLE    MIRA_GPIO_PIN(1,05)
-#define ALARM_PWM       MIRA_GPIO_PIN(0,20)
+#define ALARM_PWM       MIRA_GPIO_PIN(0,20) //Going to 1,11
 #define LED_RED         MIRA_GPIO_PIN(1,07)
 #define LED_BLUE        MIRA_GPIO_PIN(0,21)
 #define LED_GREEN       MIRA_GPIO_PIN(0,12)

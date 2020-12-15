@@ -30,7 +30,7 @@ void mira_setup(void){
 
 PROCESS_THREAD(boot_proc, ev, data)
 {
-    // static struct etimer timer;
+    static struct etimer timer;
 
     PROCESS_BEGIN();
     PROCESS_PAUSE();

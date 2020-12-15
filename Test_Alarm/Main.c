@@ -21,6 +21,7 @@ MIRA_IODEFS(
 void alarm_on(void){
     printf("alarm_on()\n");
     mira_gpio_set_value(ALARM_ENABLE, 1);
+    pwm_set_value(100);
 }
 
 void alarm_off(void){
@@ -74,17 +75,21 @@ PROCESS_THREAD(main_proc, ev, data)
     etimer_set(&timer, ALARM_INTERVAL * CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
 
-    alarm_off();
+    // alarm_off();
 
     while (1) {
 
         // alarm_on();
-        // etimer_set(&timer, ALARM_INTERVAL * CLOCK_SECOND);
-        // PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
-
-        // alarm_off();
         etimer_set(&timer, ALARM_INTERVAL * CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+
+        // alarm_off();
+        // for(i=5; i<15; i=i+1){
+        //     pwm_set_value(i);
+        //     printf("i=%i",i);
+        //     etimer_set(&timer, ALARM_INTERVAL * CLOCK_SECOND);
+        //     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+        // }
     }
 
 

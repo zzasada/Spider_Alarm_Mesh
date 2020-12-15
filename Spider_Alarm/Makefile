@@ -1,12 +1,12 @@
 PROJECT_NAME = Spider_Alarm
 
 TARGET ?= nrf52840ble-os
-LIBDIR ?= $(CURDIR)/../../..
+LIBDIR ?= f:/Mira/libmira-2.4.2/libmira
 
 CFLAGS += -DNRF52840_XXAA
 CFLAGS += -I $(CURDIR)
-CFLAGS += -I $(CURDIR)/../../../nRF5SDK/modules/nrfx/mdk
-CFLAGS += -I $(CURDIR)/../../../nRF5SDK/components/toolchain/cmsis/include
+CFLAGS += -I $(LIBDIR)/nRF5SDK/modules/nrfx/mdk
+CFLAGS += -I $(LIBDIR)/nRF5SDK/components/toolchain/cmsis/include
 CFLAGS += -I $(CURDIR)/../Common
 CFLAGS += -I $(CURDIR)/../Common/nrf_SDK_files
 

@@ -10,6 +10,9 @@
 #include "pwm/pwm_lib.h"
 
 #define LED_INTERVAL 1
+enum color {BLACK, BLUE, GREEN, RED, CYAN, MAGENTA, YELLOW, WHITE};
+const int PAUSE_DURATION = 1;
+const int PULSE_DURATION = 1000; //mS
 
 MIRA_IODEFS(
     MIRA_IODEF_NONE,    /* fd 0: stdin */
@@ -17,35 +20,6 @@ MIRA_IODEFS(
     MIRA_IODEF_NONE     /* fd 2: stderr */
     /* More file descriptors can be added, for use with dprintf(); */
 );
-
-void led_red(struct etimer *timer){
-    printf("led_red()\n");
-    mira_gpio_set_value(LED_RED, 0);
-    etimer_set(timer, LED_INTERVAL * CLOCK_SECOND);
-}
-
-void led_green(){
-    printf("led_green()\n");
-    mira_gpio_set_value(LED_GREEN, 0);
-}
-
-void led_blue(){
-    printf("led_blue()\n");
-    mira_gpio_set_value(LED_BLUE, 0);
-}
-
-void led_demo(){
-    printf("led_demo() todo finish with pwm\n");
-}
-
-void led_off(){
-    printf("led_off()\n");
-    mira_gpio_set_value(LED_RED, 1);
-    mira_gpio_set_value(LED_GREEN, 1);
-    mira_gpio_set_value(LED_BLUE, 1);
-}
-
-PROCESS(main_proc, "Main process");
 
 void pin_setup(void){
     // pwm_set_value(0);
@@ -60,6 +34,116 @@ void pin_setup(void){
     mira_gpio_set_value(LED_BLUE, 1);
 }
 
+PROCESS(rgb_proc, "RGB process");
+
+static enum color current_color = RED;
+
+void init_rgb(void){
+    printf("RGB: init_rgb\n");
+    mira_gpio_set_dir(LED_RED, MIRA_GPIO_DIR_OUT);
+    mira_gpio_set_value(LED_RED, 1);
+
+    mira_gpio_set_dir(LED_GREEN, MIRA_GPIO_DIR_OUT);
+    mira_gpio_set_value(LED_GREEN, 1);
+
+    mira_gpio_set_dir(LED_BLUE, MIRA_GPIO_DIR_OUT);
+    mira_gpio_set_value(LED_BLUE, 1);
+}
+
+void set_current_color(int color){
+    // printf("Setting current color %i\n", color);
+    current_color = color;
+}
+
+static void red(void){
+    mira_gpio_set_value(LED_RED, 0);
+    mira_gpio_set_value(LED_GREEN, 1);
+    mira_gpio_set_value(LED_BLUE, 1);
+}
+
+static void green(void){
+    mira_gpio_set_value(LED_RED, 1);
+    mira_gpio_set_value(LED_GREEN, 0);
+    mira_gpio_set_value(LED_BLUE, 1);
+}
+
+static void blue(void){
+    mira_gpio_set_value(LED_RED, 1);
+    mira_gpio_set_value(LED_GREEN, 1);
+    mira_gpio_set_value(LED_BLUE, 0);
+}
+
+static void white(void){
+    mira_gpio_set_value(LED_RED, 0);
+    mira_gpio_set_value(LED_GREEN, 0);
+    mira_gpio_set_value(LED_BLUE, 0);
+}
+
+static void black(void){
+    mira_gpio_set_value(LED_RED, 1);
+    mira_gpio_set_value(LED_GREEN, 1);
+    mira_gpio_set_value(LED_BLUE, 1);
+}
+
+static void magenta(void){
+    mira_gpio_set_value(LED_RED, 0);
+    mira_gpio_set_value(LED_GREEN, 1);
+    mira_gpio_set_value(LED_BLUE, 0);
+}
+
+static void yellow(void){
+    mira_gpio_set_value(LED_RED, 0);
+    mira_gpio_set_value(LED_GREEN, 0);
+    mira_gpio_set_value(LED_BLUE, 1);
+}
+
+static void cyan(void){
+    mira_gpio_set_value(LED_RED, 1);
+    mira_gpio_set_value(LED_GREEN, 0);
+    mira_gpio_set_value(LED_BLUE, 0);
+}
+
+static void set_color(int color){
+    switch (color){
+    
+    case RED:
+        red();
+        break;
+
+    case GREEN:
+        green();
+        break;
+
+    case BLUE:
+        blue();
+        break;
+
+    case MAGENTA:
+        magenta();
+        break;
+
+    case YELLOW:
+        yellow();
+        break;
+
+    case CYAN:
+        cyan();
+        break;
+
+    case WHITE:
+        white();
+        break;
+
+    case BLACK:
+        black();
+        break;
+    
+    default:
+        printf("RGB: Invalid color");
+        break;
+    }
+}
+
 void mira_setup(void){
     mira_status_t rtt_ret;
     rtt_ret = mira_rtt_init();
@@ -67,53 +151,36 @@ void mira_setup(void){
 
     MIRA_MEM_SET_BUFFER(12288);
 
-    pin_setup();
+    // pin_setup();
+    init_rgb();
 
-    process_start(&main_proc, NULL);
+    process_start(&rgb_proc, NULL);
 }
 
-PROCESS_THREAD(main_proc, ev, data)
-{
+PROCESS_THREAD(rgb_proc, ev , data){
     static struct etimer timer;
-    // static int i=0;
 
     PROCESS_BEGIN();
-    /* Pause once, so we don't run anything before finish of startup */
     PROCESS_PAUSE();
+    
+    printf("RGB, Starting process\n");
 
-    printf("Starting Test LED.\n");
-    // pwm_init();
-    // pwm_set_value(100);
-    // pwm_enable();
+    while (true) {
+        // set_color(current_color);
+        // etimer_set(&timer, PULSE_DURATION);
+        // PROCESS_YIELD_UNTIL(etimer_expired(&timer));
 
-    while (1) {
-        led_red(&timer);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+        set_color(RED);
+        etimer_set(&timer, PAUSE_DURATION * CLOCK_SECOND);
+        PROCESS_YIELD_UNTIL(etimer_expired(&timer));
 
-        led_off();
-        led_green();
-        etimer_set(&timer, LED_INTERVAL * CLOCK_SECOND);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+        set_color(GREEN);
+        etimer_set(&timer, PAUSE_DURATION * CLOCK_SECOND);
+        PROCESS_YIELD_UNTIL(etimer_expired(&timer));
 
-        led_off();
-        led_blue();
-        etimer_set(&timer, LED_INTERVAL * CLOCK_SECOND);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
-        
-        led_off();
-        // for(i=0; i<100; i++){
-        //     pwm_set_value(i);
-        //     etimer_set(&timer, 10);
-        //     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
-        // }
-
-        // for(i=100; i>0; i--){
-        //     pwm_set_value(i);
-        //     etimer_set(&timer, 10);
-        //     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
-        // }
+        set_color(BLUE);
+        etimer_set(&timer, PAUSE_DURATION * CLOCK_SECOND);
+        PROCESS_YIELD_UNTIL(etimer_expired(&timer));
     }
-
-
-    PROCESS_END();
+    PROCESS_END()
 }
