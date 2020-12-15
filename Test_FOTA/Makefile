@@ -2,8 +2,8 @@ PROJECT_NAME = fota_receiver
 
 TARGET ?= nrf52840ble-os
 TARGET_APP ?= nrf52840ble-os-app
-LIBDIR ?= $(CURDIR)/../../..
-SDK_DIR ?= $(CURDIR)/../../../nRF5SDK
+LIBDIR ?= f:/Mira/libmira-2.4.2/libmira
+SDK_DIR ?= $(LIBDIR)/nRF5SDK
 
 SOURCE_FILES = \
 	fota_receiver.c \
